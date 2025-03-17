@@ -8,9 +8,9 @@ use Bmwx591\RequestLogger\Logger\RequestInfo;
 
 interface RulesResolverInterface
 {
-    public function needToLogMainRequest(RequestInfo $request): bool;
+    public function needToLogMainRequest(RequestInfo $info): bool;
 
-    public function needToLogExternalRequests(RequestInfo $request): bool;
+    public function needToLogExternalRequests(RequestInfo $info): bool;
 
-    public function needToLogExternalRequest(RequestInfo $request): bool;
+    public function needToLogExternalRequest(RequestInfo $info): bool;
 }
