@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Bmwx591\RequestLogger\Tests\Unit\Logger;
 
-use Bmwx591\RequestLogger\Logger\ExternalRequest;
+use Bmwx591\RequestLogger\Logger\RequestInfo;
 use Bmwx591\RequestLogger\Logger\RequestLogger;
-use Bmwx591\RequestLogger\Logger\WrappedRequest;
-use Bmwx591\RequestLogger\Logger\WrappedResponse;
 use Bmwx591\RequestLogger\Mapper\RequestMapperInterface;
+use Bmwx591\RequestLogger\Request\WrappedRequest;
+use Bmwx591\RequestLogger\Response\WrappedResponse;
 use Bmwx591\RequestLogger\RulesResolver\RulesResolverInterface;
 use Bmwx591\RequestLogger\Tests\Util\InMemoryLogger;
 use PHPUnit\Framework\TestCase;
@@ -84,7 +84,7 @@ class RequestLoggerTest extends TestCase
         );
 
         $this->initializeRequestLogger($this->rulesResolver)
-             ->addExternal(new ExternalRequest($this->stubWrappedRequest(), $this->stubWrappedResponse()))
+             ->addExternal(new RequestInfo($this->stubWrappedRequest(), $this->stubWrappedResponse()))
              ->pushLogs();
 
         $logs = $this->logger->getLogs()['info'];
@@ -103,7 +103,7 @@ class RequestLoggerTest extends TestCase
         return $requestLogger
             ->incomingRequest($this->stubWrappedRequest())
             ->outgoingResponse($this->stubWrappedResponse())
-            ->addExternal(new ExternalRequest($this->stubWrappedRequest(), $this->stubWrappedResponse()));
+            ->addExternal(new RequestInfo($this->stubWrappedRequest(), $this->stubWrappedResponse()));
     }
 
     private function stubWrappedRequest(): WrappedRequest

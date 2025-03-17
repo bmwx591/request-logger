@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Bmwx591\RequestLogger\Logger;
+namespace Bmwx591\RequestLogger\Response;
 
 interface WrappedResponse
 {

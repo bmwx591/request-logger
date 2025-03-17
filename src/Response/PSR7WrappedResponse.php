@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Bmwx591\RequestLogger\Logger;
+namespace Bmwx591\RequestLogger\Response;
 
 use Psr\Http\Message\ResponseInterface;
 
-class PSR7Response implements WrappedResponse
+class PSR7WrappedResponse implements WrappedResponse
 {
     private ResponseInterface $response;
 

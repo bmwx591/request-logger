@@ -5,7 +5,11 @@ declare(strict_types=1);
 namespace Bmwx591\RequestLogger\Logger;
 
 use Bmwx591\RequestLogger\Mapper\RequestMapperInterface;
+use Bmwx591\RequestLogger\Request\WrappedRequest;
+use Bmwx591\RequestLogger\Response\WrappedResponse;
 use Bmwx591\RequestLogger\RulesResolver\RulesResolverInterface;
+use DateTimeImmutable;
+use DateTimeInterface;
 use Psr\Log\LoggerInterface;
 
 class RequestLogger
@@ -20,7 +24,9 @@ class RequestLogger
 
     private ?WrappedResponse $outgoingResponse = null;
 
-    /** @var array<ExternalRequest> */
+    private ?DateTimeInterface $requestDate = null;
+
+    /** @var array<RequestInfo> */
     private array $externals = [];
 
     public function __construct(
@@ -36,6 +42,7 @@ class RequestLogger
     public function incomingRequest(WrappedRequest $request): self
     {
         $this->incomingRequest = $request;
+        $this->requestDate     = new DateTimeImmutable();
 
         return $this;
     }
@@ -47,7 +54,7 @@ class RequestLogger
         return $this;
     }
 
-    public function addExternal(ExternalRequest $external): self
+    public function addExternal(RequestInfo $external): self
     {
         $this->externals[] = $external;
 
@@ -56,14 +63,20 @@ class RequestLogger
 
     public function pushLogs(): void
     {
-        if ($this->needToLogMainRequest($this->incomingRequest, $this->outgoingResponse)) {
+        $incomingRequest = new RequestInfo(
+            $this->incomingRequest,
+            $this->outgoingResponse,
+            $this->requestDate,
+        );
+
+        if ($this->needToLogMainRequest($incomingRequest)) {
             $this->logger->info(
-                $this->requestMapper->mapLogTitle($this->incomingRequest, $this->outgoingResponse),
-                $this->requestMapper->mapLogContext($this->incomingRequest, $this->outgoingResponse),
+                $this->requestMapper->mapLogTitle($incomingRequest),
+                $this->requestMapper->mapLogContext($incomingRequest),
             );
         }
 
-        if ($this->needToLogExternalRequests($this->incomingRequest, $this->outgoingResponse)) {
+        if ($this->needToLogExternalRequests($incomingRequest)) {
             $this->pushExternalsLog();
         }
     }
@@ -71,33 +84,27 @@ class RequestLogger
     private function pushExternalsLog(): void
     {
         foreach ($this->externals as $external) {
-            if ($this->needToLogExternalRequest($external->request(), $external->response())) {
+            if ($this->needToLogExternalRequest($external)) {
                 $this->logger->info(
-                    $this->requestMapper->mapExternalLogTitle($external->request(), $external->response()),
-                    $this->requestMapper->mapExternalLogContext($external->request(), $external->response()),
+                    $this->requestMapper->mapExternalLogTitle($external),
+                    $this->requestMapper->mapExternalLogContext($external),
                 );
             }
         }
     }
 
-    private function needToLogMainRequest(
-        ?WrappedRequest  $request,
-        ?WrappedResponse $response
-    ): bool {
-        return !$this->rulesResolver || $this->rulesResolver->needToLogMainRequest($request, $response);
+    private function needToLogMainRequest(RequestInfo $request): bool
+    {
+        return !$this->rulesResolver || $this->rulesResolver->needToLogMainRequest($request);
     }
 
-    private function needToLogExternalRequests(
-        ?WrappedRequest  $request,
-        ?WrappedResponse $response
-    ): bool {
-        return !$this->rulesResolver || $this->rulesResolver->needToLogExternalRequests($request, $response);
+    private function needToLogExternalRequests(RequestInfo $request): bool
+    {
+        return !$this->rulesResolver || $this->rulesResolver->needToLogExternalRequests($request);
     }
 
-    private function needToLogExternalRequest(
-        ?WrappedRequest  $request,
-        ?WrappedResponse $response
-    ): bool {
-        return !$this->rulesResolver || $this->rulesResolver->needToLogExternalRequest($request, $response);
+    private function needToLogExternalRequest(RequestInfo $request): bool
+    {
+        return !$this->rulesResolver || $this->rulesResolver->needToLogExternalRequest($request);
     }
 }

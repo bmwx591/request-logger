@@ -4,15 +4,18 @@ declare(strict_types=1);
 
 namespace Bmwx591\RequestLogger\Logger;
 
+use Bmwx591\RequestLogger\Request\WrappedRequest;
+use Bmwx591\RequestLogger\Response\WrappedResponse;
 use DateTimeImmutable;
+use DateTimeInterface;
 
-class ExternalRequest
+class RequestInfo
 {
     private WrappedRequest $request;
 
     private WrappedResponse $response;
 
-    private DateTimeImmutable $requestDate;
+    private DateTimeInterface $requestDate;
 
     public function __construct(
         WrappedRequest     $request,
@@ -34,7 +37,7 @@ class ExternalRequest
         return $this->response;
     }
 
-    public function requestDate(): DateTimeImmutable
+    public function requestDate(): DateTimeInterface
     {
         return $this->requestDate;
     }
