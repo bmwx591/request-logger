@@ -13,22 +13,43 @@ use PHPUnit\Framework\TestCase;
 class RequestInfoTest extends TestCase
 {
     /**
-     * @return void
+     * @dataProvider dataProvider
      */
-    public function testRequestCreation(): void
+    public function testRequestCreation(bool $hasRequest, bool $hasResponse): void
     {
-        $wrappedRequest  = $this->createStub(WrappedRequest::class);
-        $wrappedResponse = $this->createStub(WrappedResponse::class);
+        $wrappedRequest  = $hasRequest ? $this->createStub(WrappedRequest::class) : null;
+        $wrappedResponse = $hasResponse ? $this->createStub(WrappedResponse::class) : null;
         $now             = new DateTimeImmutable('+2 sec');
 
-        $request = new RequestInfo($wrappedRequest, $wrappedResponse, $now);
+        $info = new RequestInfo($wrappedRequest, $wrappedResponse, $now);
 
-        self::assertInstanceOf(RequestInfo::class, $request);
-        self::assertInstanceOf(WrappedRequest::class, $request->request());
-        self::assertInstanceOf(WrappedResponse::class, $request->response());
-        self::assertInstanceOf(DateTimeImmutable::class, $request->requestDate());
-        self::assertSame($wrappedRequest, $request->request());
-        self::assertSame($wrappedResponse, $request->response());
-        self::assertSame($now, $request->requestDate());
+        self::assertInstanceOf(RequestInfo::class, $info);
+
+        if ($hasRequest) {
+            self::assertInstanceOf(WrappedRequest::class, $info->request());
+            self::assertSame($wrappedRequest, $info->request());
+        } else {
+            self::assertNull($info->request());
+        }
+
+        if ($hasResponse) {
+            self::assertInstanceOf(WrappedResponse::class, $info->response());
+            self::assertSame($wrappedResponse, $info->response());
+        } else {
+            self::assertNull($info->response());
+        }
+
+        self::assertInstanceOf(DateTimeImmutable::class, $info->requestDate());
+        self::assertSame($now, $info->requestDate());
+    }
+
+    public function dataProvider(): array
+    {
+        return [
+            'all data' => [true, true],
+            'only request' => [true, false],
+            'only response' => [false, true],
+            'empty data' => [false, false],
+        ];
     }
 }

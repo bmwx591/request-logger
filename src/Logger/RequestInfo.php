@@ -11,15 +11,15 @@ use DateTimeInterface;
 
 class RequestInfo
 {
-    private WrappedRequest $request;
+    private ?WrappedRequest $request;
 
-    private WrappedResponse $response;
+    private ?WrappedResponse $response;
 
     private DateTimeInterface $requestDate;
 
     public function __construct(
-        WrappedRequest     $request,
-        WrappedResponse    $response,
+        ?WrappedRequest    $request = null,
+        ?WrappedResponse   $response = null,
         ?DateTimeImmutable $requestDate = null
     ) {
         $this->request     = $request;
@@ -27,12 +27,12 @@ class RequestInfo
         $this->requestDate = $requestDate ?? new DateTimeImmutable();
     }
 
-    public function request(): WrappedRequest
+    public function request(): ?WrappedRequest
     {
         return $this->request;
     }
 
-    public function response(): WrappedResponse
+    public function response(): ?WrappedResponse
     {
         return $this->response;
     }
